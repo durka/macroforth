@@ -11,25 +11,25 @@ macro_rules! lookup {
     // a linear search for the needle.
 
     // The map-to-scan is empty. Abort compilation immediately.
-    (@scan $needle:tt {} $pass:tt) => {
-        compile_error!(concat!("KeyError: ", stringify!($needle)))
+    (@scan $needle:tt {} [$then:ident!$targs:tt $else:ident!($($eargs:tt)*)]) => {
+        $else!($($eargs)* $needle)
     };
     
     // This rule destructively scans the map. We check the first key to see
     // if it is equal to the needle. If so, jump to continuation. Otherwise,
     // throw away that key/value pair and keep scanning.
-    (@scan $needle:tt {$key:tt : $val:tt $($k:tt : $v:tt)*} [$then:ident!($($args:tt)*)]) => {{
+    (@scan $needle:tt {$key:tt : $val:tt $($k:tt : $v:tt)*} [$then:ident!($($targs:tt)*) $else:ident!$eargs:tt]) => {{
         /// We redefine this macro every time in order to compare the current
         /// key with the needle.
         macro_rules! _lookup_cmp {
             // Found it!
             ($needle $needle) => {
-                $then!($($args)* $val)
+                $then!($($targs)* $val)
             };
             
             // Did not find it
             ($x:tt $y:tt) => {
-                lookup!(@scan $needle {$($k:$v)*} [$then!($($args)*)])
+                lookup!(@scan $needle {$($k:$v)*} [$then!($($targs)*) $else!$eargs])
             }
         }
         
@@ -38,8 +38,8 @@ macro_rules! lookup {
     }};
 
     // Entrypoint
-    ($then:ident!$args:tt {$($k:tt : $v:tt),*} $needle:tt) => {
-        lookup!(@scan $needle {$($k:$v)*} [$then!$args])
+    ($then:ident!$targs:tt $else:ident!$eargs:tt {$($k:tt : $v:tt),*} $needle:tt) => {
+        lookup!(@scan $needle {$($k:$v)*} [$then!$targs $else!$eargs])
     }
 }
 

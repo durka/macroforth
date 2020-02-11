@@ -9,6 +9,12 @@ macro_rules! stringfy {
     }
 }
 
+macro_rules! strerror {
+    ($label:tt, $x:tt) => {
+        println!("ERROR: {}: {}", $label, stringify!($x))
+    }
+}
+
 macro_rules! mathfy {
     (@count ($mag:expr) [] [$label:tt $copy:tt $sign:expr]) => {
         println!("{} = {} = {}", $label, stringify!($copy), $sign * $mag)
@@ -28,31 +34,34 @@ macro_rules! mathfy {
 }
 
 fn main() {
-    lookup!(stringfy!("a",) {a: 1, b: 2} a);
-    lookup!(stringfy!("b",) {a: 1, b: 2} b);
-    lookup!(lookup!(stringfy!("c->b",) {a: 1, b: 3, c: 2} ) {a: asdf, b: +, c: b} c);
+    lookup!(stringfy!("a",) strerror!("KeyError",) {a: 1, b: 2} a);
+    lookup!(stringfy!("b",) strerror!("KeyError",) {a: 1, b: 2} b);
+    lookup!(println!("{:?}", ) strerror!("KeyError",) {a: 1, b: 2} c); //~ERROR KeyError: c
+    lookup!(lookup!(stringfy!("c->b",) strerror!("KeyError",) {a: 1, b: 3, c: 2} ) strerror!("KeyError",) {a: asdf, b: +, c: b} c);
 
-    builtin!(stringfy!("drop", ) [  [   .               ] [   . .             ] [ . . . ]  ] drop ) ;
-    builtin!(stringfy!("swap", ) [  [   .               ] [   . .             ] [ . . . ]  ] swap ) ;
-    builtin!(stringfy!("dup",  ) [  [   .               ] [   . .             ] [ . . . ]  ] dup  ) ;
-    builtin!(stringfy!("over", ) [  [   .               ] [   . .             ] [ . . . ]  ] over ) ;
-    builtin!(stringfy!("rot",  ) [  [   .               ] [   . .             ] [ . . . ]  ] rot  ) ;
-    builtin!(mathfy!("3+8",  )   [  [   . . .           ] [   . . . . . . . . ]            ] +    ) ;
-    builtin!(mathfy!("-3+8", )   [  [ - . . .           ] [   . . . . . . . . ]            ] +    ) ;
-    builtin!(mathfy!("-8+3", )   [  [ - . . . . . . . . ] [   . . .           ]            ] +    ) ;
-    builtin!(mathfy!("8+-3", )   [  [   . . . . . . . . ] [ - . . .           ]            ] +    ) ;
-    builtin!(mathfy!("3+-8", )   [  [   . . .           ] [ - . . . . . . . . ]            ] +    ) ;
-    builtin!(mathfy!("3+-3", )   [  [   . . .           ] [ - . . .           ]            ] +    ) ;
-    builtin!(mathfy!("-3+3", )   [  [ - . . .           ] [   . . .           ]            ] +    ) ;
-    builtin!(mathfy!("-3",   )   [  [   . . .           ]                                  ] !    ) ;
-    builtin!(mathfy!("--3",  )   [  [ - . . .           ]                                  ] !    ) ;
+    builtin!(stringfy!("drop", ) strerror!("unknown op",) [  [   .               ] [   . .             ] [ . . . ]  ] drop ) ;
+    builtin!(stringfy!("swap", ) strerror!("unknown op",) [  [   .               ] [   . .             ] [ . . . ]  ] swap ) ;
+    builtin!(stringfy!("dup",  ) strerror!("unknown op",) [  [   .               ] [   . .             ] [ . . . ]  ] dup  ) ;
+    builtin!(stringfy!("over", ) strerror!("unknown op",) [  [   .               ] [   . .             ] [ . . . ]  ] over ) ;
+    builtin!(stringfy!("rot",  ) strerror!("unknown op",) [  [   .               ] [   . .             ] [ . . . ]  ] rot  ) ;
+    builtin!(mathfy!("3+8",  )   strerror!("unknown op",) [  [   . . .           ] [   . . . . . . . . ]            ] +    ) ;
+    builtin!(mathfy!("-3+8", )   strerror!("unknown op",) [  [ - . . .           ] [   . . . . . . . . ]            ] +    ) ;
+    builtin!(mathfy!("-8+3", )   strerror!("unknown op",) [  [ - . . . . . . . . ] [   . . .           ]            ] +    ) ;
+    builtin!(mathfy!("8+-3", )   strerror!("unknown op",) [  [   . . . . . . . . ] [ - . . .           ]            ] +    ) ;
+    builtin!(mathfy!("3+-8", )   strerror!("unknown op",) [  [   . . .           ] [ - . . . . . . . . ]            ] +    ) ;
+    builtin!(mathfy!("3+-3", )   strerror!("unknown op",) [  [   . . .           ] [ - . . .           ]            ] +    ) ;
+    builtin!(mathfy!("-3+3", )   strerror!("unknown op",) [  [ - . . .           ] [   . . .           ]            ] +    ) ;
+    builtin!(mathfy!("-3",   )   strerror!("unknown op",) [  [   . . .           ]                                  ] !    ) ;
+    builtin!(mathfy!("--3",  )   strerror!("unknown op",) [  [ - . . .           ]                                  ] !    ) ;
 
-    control!(stringfy!("1 2 + !",) [[.] [. .] + !] []);
-    control!(stringfy!("1 -1 +",) [[.] dup ! +] []);
-    control!(stringfy!("3 {1 +} 1 1 - if",) [[. . .] {[.] +} [.] dup ! + if] []);
-    control!(stringfy!("3 {1 +} 2 1 - if",) [[. . .] {[.] +} [. .] [- .] + if] []);
-    control!(stringfy!(": - swap ! + ;   3 2 -",) [: - swap ! + ; [. . .] [. .] -] []);
-    
-    //lookup!(println!("{:?}", ) {a: 1, b: 2} c); //~ERROR KeyError: c
+    control!(stringfy!("1 2 +",) [[.] [. .] +] {} []);
+    control!(stringfy!("1 2 + !",) [[.] [. .] + !] {} []);
+    control!(stringfy!("1 -1 +",) [[.] dup ! +] {} []);
+    control!(stringfy!("3 {1 +} 1 1 - if",) [[. . .] {[.] +} [.] dup ! + if] {} []);
+    control!(stringfy!("3 {1 +} 2 1 - if",) [[. . .] {[.] +} [. .] [- .] + if] {} []);
+    control!(stringfy!("3 8 -",) [: - swap ! + ; [. . .] [. . . . . . . .] -] {} []);
+    control!(stringfy!("8 3 -",) [: - swap ! + ; [. . . . . . . .] [. . .] -] {} []);
+    control!(stringfy!("3 8 - abs",) [: - swap ! + ; : abs dup ~ {!} swap if ; [. . .] [. . . . . . . .] - abs] {} []);
+    control!(stringfy!("8 3 - abs",) [: - swap ! + ; : abs dup ~ {!} swap if ; [. . . . . . . .] [. . .] - abs] {} []);
 }
 

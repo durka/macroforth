@@ -45,6 +45,16 @@ macro_rules! math {
         $then!($($args)* [- $($a)*])
     };
 
+    // negative? -
+    ($then:ident!($($args:tt)*) [- $($a:tt)*] ~) => {
+        $then!($($args)* [.])
+    };
+
+    // negative? +
+    ($then:ident!($($args:tt)*) [$($a:tt)*] ~) => {
+        $then!($($args)* [])
+    };
+
     ($then:ident!($($args:tt)*) $($x:tt)*) => {
         compile_error!(concat!("Unknown math expression: ", stringify!($($x)*)))
     };
