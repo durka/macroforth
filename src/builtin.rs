@@ -40,7 +40,7 @@ macro_rules! builtin {
         math!(builtin!(@push $then!$targs $else!$eargs [$($tail)*]) $head !)
     };
 
-    // NEG? [x -- -x]
+    // SIGN [x -- s] (s == 1 if x > 0, 0 otherwise)
     ($then:ident!$targs:tt $else:ident!$eargs:tt [$head:tt $($tail:tt)*] ~) => {
         math!(builtin!(@push $then!$targs $else!$eargs [$($tail)*]) $head ~)
     };

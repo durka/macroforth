@@ -45,14 +45,14 @@ macro_rules! math {
         $then!($($args)* [- $($a)*])
     };
 
-    // negative? -
+    // sign -
     ($then:ident!($($args:tt)*) [- $($a:tt)*] ~) => {
-        $then!($($args)* [.])
+        $then!($($args)* [])
     };
 
-    // negative? +
+    // sign +
     ($then:ident!($($args:tt)*) [$($a:tt)*] ~) => {
-        $then!($($args)* [])
+        $then!($($args)* [.])
     };
 
     ($then:ident!($($args:tt)*) $($x:tt)*) => {

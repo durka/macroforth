@@ -1,4 +1,5 @@
 #![feature(trace_macros)]
+#![recursion_limit="512"]
 
 extern crate macroforth;
 use macroforth::*;
@@ -36,6 +37,7 @@ macro_rules! mathfy {
 fn main() {
     lookup!(stringfy!("a",) strerror!("KeyError",) {a: 1, b: 2} a);
     lookup!(stringfy!("b",) strerror!("KeyError",) {a: 1, b: 2} b);
+    lookup!(stringfy!("b",) strerror!("KeyError",) {a: 1, b: 2, b: 3} b);
     lookup!(println!("{:?}", ) strerror!("KeyError",) {a: 1, b: 2} c); //~ERROR KeyError: c
     lookup!(lookup!(stringfy!("c->b",) strerror!("KeyError",) {a: 1, b: 3, c: 2} ) strerror!("KeyError",) {a: asdf, b: +, c: b} c);
 
@@ -59,9 +61,20 @@ fn main() {
     control!(stringfy!("1 -1 +",) [[.] dup ! +] {} []);
     control!(stringfy!("3 {1 +} 1 1 - if",) [[. . .] {[.] +} [.] dup ! + if] {} []);
     control!(stringfy!("3 {1 +} 2 1 - if",) [[. . .] {[.] +} [. .] [- .] + if] {} []);
-    control!(stringfy!("3 8 -",) [: - swap ! + ; [. . .] [. . . . . . . .] -] {} []);
-    control!(stringfy!("8 3 -",) [: - swap ! + ; [. . . . . . . .] [. . .] -] {} []);
-    control!(stringfy!("3 8 - abs",) [: - swap ! + ; : abs dup ~ {!} swap if ; [. . .] [. . . . . . . .] - abs] {} []);
-    control!(stringfy!("8 3 - abs",) [: - swap ! + ; : abs dup ~ {!} swap if ; [. . . . . . . .] [. . .] - abs] {} []);
+    control!(stringfy!("3 8 -  8 3 -",)
+        [
+            : - swap ! + ;
+            [. . .] [. . . . . . . .] -
+            [. . . . . . . .] [. . .] -
+        ] {} []);
+    control!(stringfy!("3 8 - abs  8 3 - abs",)
+        [
+            : - swap ! + ;
+            : abs dup ! ~ {!} swap if ;
+            : 3 [. . .] ;
+            : 8 3 3 + [. .] + ;
+            3 8 - abs
+            8 3 - abs
+        ] {} []);
 }
 
