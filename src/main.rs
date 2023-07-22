@@ -1,5 +1,5 @@
 #![feature(trace_macros)]
-#![recursion_limit="512"]
+#![recursion_limit="1024"]
 
 extern crate macroforth;
 use macroforth::*;
@@ -56,17 +56,17 @@ fn main() {
     builtin!(mathfy!("-3",   )   strerror!("unknown op",) [  [   . . .           ]                                  ] !    ) ;
     builtin!(mathfy!("--3",  )   strerror!("unknown op",) [  [ - . . .           ]                                  ] !    ) ;
 
-    control!(stringfy!("1 2 +",) [[.] [. .] +] {} []);
-    control!(stringfy!("1 2 + !",) [[.] [. .] + !] {} []);
-    control!(stringfy!("1 -1 +",) [[.] dup ! +] {} []);
-    control!(stringfy!("3 {1 +} 1 1 - if",) [[. . .] {[.] +} [.] dup ! + if] {} []);
-    control!(stringfy!("3 {1 +} 2 1 - if",) [[. . .] {[.] +} [. .] [- .] + if] {} []);
+    control!(stringfy!("1 2 +",) [[.] [. .] +] {} {} []);
+    control!(stringfy!("1 2 + !",) [[.] [. .] + !] {} {} []);
+    control!(stringfy!("1 -1 +",) [[.] dup ! +] {} {} []);
+    control!(stringfy!("3 {1 +} 1 1 - if",) [[. . .] {[.] +} [.] dup ! + if] {} {} []);
+    control!(stringfy!("3 {1 +} 2 1 - if",) [[. . .] {[.] +} [. .] [- .] + if] {} {} []);
     control!(stringfy!("3 8 -  8 3 -",)
         [
             : - swap ! + ;
             [. . .] [. . . . . . . .] -
             [. . . . . . . .] [. . .] -
-        ] {} []);
+        ] {} {} []);
     control!(stringfy!("3 8 - abs  8 3 - abs",)
         [
             : - swap ! + ;
@@ -75,6 +75,8 @@ fn main() {
             : 8 3 3 + [. .] + ;
             3 8 - abs
             8 3 - abs
-        ] {} []);
+        ] {} {} []);
+
+    control!(stringfy!("loop",) [[- . . .] {[.] + {break} if} loop] {} {} []);
 }
 
