@@ -54,7 +54,7 @@ macro_rules! control {
     ($then:ident!$args:tt $program:tt $words:tt $loops:tt $stack:tt $op:tt) => {
         lookup!(control!(@eval $then!$args $program $words $loops $stack)
                 builtin!(control!($then!$args $program $words $loops)
-                         control!($then!$args $program $words $loops $stack)
+                         strerror!("unknown word or bad stack format",)
                          $stack)
                 $words $op)
     };

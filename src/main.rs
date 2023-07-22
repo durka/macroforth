@@ -77,6 +77,9 @@ fn main() {
             8 3 - abs
         ] {} {} []);
 
-    control!(stringfy!("loop",) [[- . . .] {[.] + {break} if} loop] {} {} []);
+    control!(stringfy!("loop",) [[- . . .] {[.] + {break} if} loop] {} {} []); //~ERROR unknown word if
+    control!(stringfy!("loop",) [[- . . .] {dup [.] + {break} swep if} loop] {} {} []); //~ERROR unknown word swep
+    trace_macros!(true);
+    control!(stringfy!("loop",) [[- . . .] {[.] + dup ~ {break} swap if} loop] {} {} []); // works
 }
 
